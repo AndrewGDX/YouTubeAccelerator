@@ -1,0 +1,31 @@
+#PlayBackRatePanel {
+    color: #CFCFCF;
+    z-Index: 999999;
+    position: absolute;
+    left: 47.6%;
+}
+.PlayBackRatePanel {
+    top: 60px;
+    display: inline;
+    width: 120px;
+    height: 24px;
+}
+.PlayBackRatePanelFullScreen {
+    top: 100px;
+    display: inline;
+    width: 114px;
+    height: 24px;
+}
+#PlayBackRate {
+    color: #ffffffdd;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 18px;
+    width: 80px;
+    height: 46px;
+    background: rgba(0, 0, 0, 0.5);
+    line-height: 20px;
+    border-radius: 3px;
+    border-style: none;
+    padding: 0px;
+}
