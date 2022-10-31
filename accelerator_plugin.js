@@ -11,6 +11,38 @@ var ytPluginStart = function() {
         }
     };
 
+    var updateSettings = function () {
+        chrome.storage.sync.get({
+            maxSpeedSetting: 'x8',
+            hotkeysSetting: 's1'
+        }, function(items) {
+            if (items.maxSpeedSetting == 'x8') {
+                ytp.settings.maxSpeed = 8;
+            } else if (items.maxSpeedSetting == 'x4') {
+                ytp.settings.maxSpeed = 4;
+            } else if (items.maxSpeedSetting == 'x3') {
+                ytp.settings.maxSpeed = 3;
+            }
+
+            if (items.hotkeysSetting == 's1') {
+                ytp.settings.slowerKeyCode = "219"; // [
+                ytp.settings.fasterKeyCode = "221"; // ]
+            } else if (items.hotkeysSetting == 's2') {
+                ytp.settings.slowerKeyCode = "186"; // ;
+                ytp.settings.fasterKeyCode = "222"; // '
+            } else if (items.hotkeysSetting == 's3') {
+                ytp.settings.slowerKeyCode = "188"; // ,
+                ytp.settings.fasterKeyCode = "190"; // .
+            }
+        });
+    }
+
+    chrome.storage.onChanged.addListener(function(changes, namespace) {
+        updateSettings();
+    });
+
+    updateSettings();
+
     ytp.videoController = function(R) {
         this.video = R;
         this.initializeControls();
@@ -63,6 +95,8 @@ var ytPluginStart = function() {
             if (!R.shiftKey && !R.metaKey && !R.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
                 if (vid.playbackRate < ytp.settings.maxSpeed) {
                     vid.playbackRate += 0.25;
+                } else {
+                    vid.playbackRate = ytp.settings.maxSpeed;
                 }
             } else if (!R.shiftKey && !R.metaKey && !R.ctrlKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
                 if (vid.playbackRate > 0.25) {

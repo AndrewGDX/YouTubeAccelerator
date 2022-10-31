@@ -1,8 +1,12 @@
 {
   "name": "YouTube Accelerator",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Accelerate your YouTube videos even faster!",
-  "icons": {"48": "icon.png"},
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png" 
+  },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
@@ -11,5 +15,16 @@
       "js": ["accelerator_plugin.js"]
     }
   ],
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png" 
+    },
+    "default_popup": "settings.html"
+  },
   "manifest_version": 3
 }

@@ -1,0 +1,23 @@
+body {
+    width: 250px;
+}
+
+#settings-wrapper {
+    padding: 5px;
+}
+
+#settings-header h1 {
+    font-size: 18px;
+    margin: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items:center;
+}
+
+#settings-header img {
+    padding-right: 10px;
+}
+
+select {
+    float: right;
+}
