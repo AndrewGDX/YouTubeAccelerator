@@ -1,7 +1,7 @@
-var ytPluginStart = function() {
+let ytPluginStart = function () {
     console.log("YouTube Accelerator loaded");
 
-    var ytp = {
+    let ytp = {
         settings: {
             maxSpeed: 8,
             tooltipFade: 300,
@@ -11,11 +11,11 @@ var ytPluginStart = function() {
         }
     };
 
-    var updateSettings = function () {
+    let updateSettings = function () {
         chrome.storage.sync.get({
             maxSpeedSetting: 'x8',
             hotkeysSetting: 's1'
-        }, function(items) {
+        }, function (items) {
             if (items.maxSpeedSetting == 'x8') {
                 ytp.settings.maxSpeed = 8;
             } else if (items.maxSpeedSetting == 'x4') {
@@ -37,30 +37,30 @@ var ytPluginStart = function() {
         });
     }
 
-    chrome.storage.onChanged.addListener(function(changes, namespace) {
+    chrome.storage.onChanged.addListener(function (changes, namespace) {
         updateSettings();
     });
 
     updateSettings();
 
-    ytp.videoController = function(R) {
-        this.video = R;
+    ytp.videoController = function (vid) {
+        this.video = vid;
         this.initializeControls();
         this.speedIndicator.textContent = "1x";
-        R.addEventListener("ratechange", function(V) {
-            if (R.readyState === 0) {
+        vid.addEventListener("ratechange", function() {
+            if (vid.readyState === 0) {
                 return;
             }
             this.speedIndicator.textContent = this.video.playbackRate + "x";
         }.bind(this));
     };
 
-    ytp.videoController.prototype.initializeControls = function() {
-        var R = document.createDocumentFragment();
-        var S = document.createElement("div");
+    ytp.videoController.prototype.initializeControls = function () {
+        let R = document.createDocumentFragment();
+        let S = document.createElement("div");
         S.setAttribute("id", "PlayBackRatePanel");
         S.className = "PlayBackRatePanel";
-        var T = document.createElement("button");
+        let T = document.createElement("button");
         T.setAttribute("id", "PlayBackRate");
         T.className = "btn";
         S.style.display = "none";
@@ -70,59 +70,61 @@ var ytPluginStart = function() {
         this.speedIndicator = T;
     };
 
-    var vids = document.getElementsByTagName("video");
-    for (var i = 0; i < vids.length; i++) {
+    let vids = document.getElementsByTagName("video");
+    for (let i = 0; i < vids.length; i++) {
         new ytp.videoController(vids[i]);
     }
 
-    document.addEventListener("DOMNodeInserted", function(R) {
-        var node = R.target || null;
+    document.addEventListener("DOMNodeInserted", function (ev) {
+        let node = ev.target || null;
         if (node && node.nodeName === "VIDEO") {
             new ytp.videoController(node);
         }
     });
-    
-    document.addEventListener("keydown", function(R) {
+
+    document.addEventListener("keydown", function (ev) {
         if ((document.activeElement.nodeName === "INPUT" && document.activeElement.getAttribute("type") === "text")
             || (document.activeElement.parentElement.nodeName === "YT-FORMATTED-STRING" && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")) {
             return false;
         }
 
-        var vids = document.getElementsByTagName("video");
+        let vids = document.getElementsByTagName("video");
 
-        for (var i = 0; i < vids.length; i++) {
-            var vid = vids[i];
-            if (!R.shiftKey && !R.metaKey && !R.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
+        for (let i = 0; i < vids.length; i++) {
+            let vid = vids[i];
+            if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                 if (vid.playbackRate < ytp.settings.maxSpeed) {
                     vid.playbackRate += 0.25;
                 } else {
                     vid.playbackRate = ytp.settings.maxSpeed;
                 }
-            } else if (!R.shiftKey && !R.metaKey && !R.ctrlKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
+            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                 if (vid.playbackRate > 0.25) {
                     vid.playbackRate -= 0.25;
                 }
-            } else if (!R.shiftKey && !R.metaKey && !R.ctrlKey && ytp.settings.resetKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
+            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.resetKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                 vid.playbackRate = 1;
             } else {
-                if (R.shiftKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
+                if (ev.shiftKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                     sessionStorage.setItem("ytAcceleratorValue", Math.min(vid.playbackRate + 0.25, 2));
-                } else if (R.shiftKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + R.which + "(?:,|$)"))) {
+                } else if (ev.shiftKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                     sessionStorage.setItem("ytAcceleratorValue", Math.max(vid.playbackRate - 0.25, 0.25));
                 }
-                
+
                 return false;
             }
 
+            document.getElementById("PlayBackRate").textContent = vid.playbackRate + "x";
+
             sessionStorage.setItem("ytAcceleratorValue", vid.playbackRate);
             showTooltip(vid.playbackRate);
-        };
+        }
 
         return false;
     }, true);
 
-    var updateTooltips = function() {
-        var tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
+    let updateTooltips = function () {
+        let tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
         for (let i = 0; i < tooltips.length; i++) {
             if (document.webkitIsFullScreen == true) {
                 tooltips[i].className = "PlayBackRatePanelFullScreen";
@@ -137,16 +139,16 @@ var ytPluginStart = function() {
     document.addEventListener("mozfullscreenchange", updateTooltips, false);
     document.addEventListener("webkitfullscreenchange", updateTooltips, false);
 
-    var showTooltip = function (playbackRate) {
-        var tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
-        for (var i = 0; i < tooltips.length; i++) {
-            var tstyle = tooltips[i].style;
+    let showTooltip = function (playbackRate) {
+        let tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
+        for (let i = 0; i < tooltips.length; i++) {
+            let tstyle = tooltips[i].style;
 
             if (tstyle.display === "none") {
                 tstyle.display = "inline";
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 if (sessionStorage.getItem("ytAcceleratorValue") == playbackRate) {
                     tstyle.display = "none";
                 }
@@ -155,16 +157,18 @@ var ytPluginStart = function() {
     }
 
     window.addEventListener("yt-navigate-finish", () => {
-        var ytAcceleration = sessionStorage.getItem("ytAcceleratorValue");
+        let ytAcceleration = sessionStorage.getItem("ytAcceleratorValue");
 
         if (ytAcceleration == null) {
             return;
         }
 
-        var vids = document.getElementsByTagName("video");
-        for (var i = 0; i < vids.length; i++) {
+        let vids = document.getElementsByTagName("video");
+        for (let i = 0; i < vids.length; i++) {
             vids[i].playbackRate = ytAcceleration;
         }
+
+        document.getElementById("PlayBackRate").textContent = ytAcceleration + "x";
 
         if (ytAcceleration != 1) {
             showTooltip(ytAcceleration);
@@ -172,7 +176,7 @@ var ytPluginStart = function() {
     }, true);
 }
 
-var waitForYtPageComplete = function() {
+let waitForYtPageComplete = function () {
     if (document.readyState === "complete") {
         ytPluginStart();
     } else {
