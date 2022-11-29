@@ -7,14 +7,16 @@ let ytPluginStart = function () {
             tooltipFade: 300,
             slowerKeyCode: "188", // ,
             fasterKeyCode: "190", // .
-            resetKeyCode: "82" // R
+            resetKeyCode: "82", // R
+            keepSpeed: true
         }
     };
 
     let updateSettings = function () {
         chrome.storage.sync.get({
             maxSpeedSetting: 'x8',
-            hotkeysSetting: 's1'
+            hotkeysSetting: 's1',
+            keepSpeedSetting: 'yes'
         }, function (items) {
             if (items.maxSpeedSetting == 'x8') {
                 ytp.settings.maxSpeed = 8;
@@ -34,6 +36,8 @@ let ytPluginStart = function () {
                 ytp.settings.slowerKeyCode = "188"; // ,
                 ytp.settings.fasterKeyCode = "190"; // .
             }
+
+            ytp.settings.keepSpeed = items.keepSpeedSetting == 'yes';
         });
     }
 
@@ -114,7 +118,8 @@ let ytPluginStart = function () {
                 return false;
             }
 
-            document.getElementById("PlayBackRate").textContent = vid.playbackRate + "x";
+            let t = document.getElementById("PlayBackRate");
+            if (t != null) t.textContent = vid.playbackRate + "x";
 
             sessionStorage.setItem("ytAcceleratorValue", vid.playbackRate);
             showTooltip(vid.playbackRate);
@@ -157,6 +162,10 @@ let ytPluginStart = function () {
     }
 
     window.addEventListener("yt-navigate-finish", () => {
+        if (!ytp.settings.keepSpeed) {
+            return;
+        }
+
         let ytAcceleration = sessionStorage.getItem("ytAcceleratorValue");
 
         if (ytAcceleration == null) {

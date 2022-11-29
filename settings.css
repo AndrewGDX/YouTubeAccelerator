@@ -1,11 +1,9 @@
 body {
     width: 250px;
 }
-
 #settings-wrapper {
     padding: 5px;
 }
-
 #settings-header h1 {
     font-size: 18px;
     margin: 0;
@@ -13,11 +11,15 @@ body {
     display: flex;
     align-items:center;
 }
-
 #settings-header img {
     padding-right: 10px;
 }
-
 select {
     float: right;
+    width: 54px;
+    text-align-last: center;
+}
+.infoLabel {
+    display: block;
+    text-align: center;
 }
