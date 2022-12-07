@@ -15,7 +15,7 @@ let ytPluginStart = function () {
     let updateSettings = function () {
         chrome.storage.sync.get({
             maxSpeedSetting: 'x8',
-            hotkeysSetting: 's1',
+            hotkeysSetting: 's3',
             keepSpeedSetting: 'yes'
         }, function (items) {
             if (items.maxSpeedSetting == 'x8') {
