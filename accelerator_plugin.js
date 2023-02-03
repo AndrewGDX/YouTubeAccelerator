@@ -177,10 +177,13 @@ let ytPluginStart = function () {
             vids[i].playbackRate = ytAcceleration;
         }
 
-        document.getElementById("PlayBackRate").textContent = ytAcceleration + "x";
+        var pbrate = document.getElementById("PlayBackRate");
+        if (pbrate != null) {
+            pbrate.textContent = ytAcceleration + "x";
 
-        if (ytAcceleration != 1) {
-            showTooltip(ytAcceleration);
+            if (ytAcceleration != 1) {
+                showTooltip(ytAcceleration);
+            }
         }
     }, true);
 }
