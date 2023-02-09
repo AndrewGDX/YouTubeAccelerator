@@ -7,4 +7,5 @@ There is no UI, only keyboard shortcuts. Use '<' and '>' buttons (without shift)
 The plugin does not collect any statistics or personal data, feel free to use!
 
 Available as a plugin in Chrome Web Store
+
 https://chrome.google.com/webstore/detail/youtube-accelerator/kkbkajnjcpgpfkhgkcckeaindpjgfgib
