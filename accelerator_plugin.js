@@ -51,7 +51,7 @@ let ytPluginStart = function () {
         this.video = vid;
         this.initializeControls();
         this.speedIndicator.textContent = "1x";
-        vid.addEventListener("ratechange", function() {
+        vid.addEventListener("ratechange", function () {
             if (vid.readyState === 0) {
                 return;
             }
@@ -88,7 +88,8 @@ let ytPluginStart = function () {
 
     document.addEventListener("keydown", function (ev) {
         if ((document.activeElement.nodeName === "INPUT" && document.activeElement.getAttribute("type") === "text")
-            || (document.activeElement.parentElement.nodeName === "YT-FORMATTED-STRING" && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")) {
+            || (document.activeElement.parentElement.nodeName === "YT-FORMATTED-STRING"
+                && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")) {
             return false;
         }
 
@@ -96,6 +97,11 @@ let ytPluginStart = function () {
 
         for (let i = 0; i < vids.length; i++) {
             let vid = vids[i];
+
+            if (vid.playbackRate == null || vid.playbackRate == 0) {
+                return false;
+            }
+
             if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                 if (vid.playbackRate < ytp.settings.maxSpeed) {
                     vid.playbackRate += 0.25;
