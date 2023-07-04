@@ -195,7 +195,7 @@ let ytPluginStart = function () {
 }
 
 let waitForYtPageComplete = function () {
-    if (document.readyState === "complete") {
+    if (document.readyState === "interactive" || document.readyState === "complete") {
         ytPluginStart();
     } else {
         setTimeout(waitForYtPageComplete, 200);
