@@ -1,29 +1,29 @@
-#PlayBackRatePanel {
+.PlayBackRatePanel, .PlayBackRatePanelFullScreen {
+    display: inline;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); 
     color: #CFCFCF;
     z-Index: 999999;
-    position: absolute;
-    left: 47.6%;
 }
+
 .PlayBackRatePanel {
     top: 60px;
-    display: inline;
-    width: 120px;
-    height: 24px;
 }
+
 .PlayBackRatePanelFullScreen {
     top: 100px;
-    display: inline;
-    width: 114px;
-    height: 24px;
 }
-#PlayBackRate {
-    color: #ffffffdd;
+
+.PlayBackRateTooltip {
+    position: relative;
     vertical-align: middle;
     text-align: center;
     font-size: 18px;
-    width: 80px;
+    width: 82px;
     height: 46px;
     background: rgba(0, 0, 0, 0.5);
+    color: #ffffffdd;
     line-height: 20px;
     border-radius: 3px;
     border-style: none;

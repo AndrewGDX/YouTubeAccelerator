@@ -1,7 +1,7 @@
-let ytPluginStart = function () {
+const ytPluginStart = function () {
     console.log("YouTube Accelerator loaded");
 
-    let ytp = {
+    const ytp = {
         settings: {
             maxSpeed: 8,
             tooltipFade: 300,
@@ -10,131 +10,113 @@ let ytPluginStart = function () {
             resetKeyCode: "82", // R
             keepSpeed: true
         }
-    };
+    }
 
-    let updateSettings = function () {
+    const updateSettings = function () {
         chrome.storage.sync.get({
-            maxSpeedSetting: 'x8',
-            hotkeysSetting: 's3',
-            keepSpeedSetting: 'yes'
-        }, function (items) {
-            if (items.maxSpeedSetting == 'x8') {
+            maxSpeedSetting: "x8",
+            hotkeysSetting: "s3",
+            keepSpeedSetting: "yes"
+        }, (items) => {
+            if (items.maxSpeedSetting == "x8") {
                 ytp.settings.maxSpeed = 8;
-            } else if (items.maxSpeedSetting == 'x4') {
+            } else if (items.maxSpeedSetting == "x4") {
                 ytp.settings.maxSpeed = 4;
-            } else if (items.maxSpeedSetting == 'x3') {
+            } else if (items.maxSpeedSetting == "x3") {
                 ytp.settings.maxSpeed = 3;
             }
 
-            if (items.hotkeysSetting == 's1') {
+            if (items.hotkeysSetting == "s1") {
                 ytp.settings.slowerKeyCode = "219"; // [
                 ytp.settings.fasterKeyCode = "221"; // ]
-            } else if (items.hotkeysSetting == 's2') {
+            } else if (items.hotkeysSetting == "s2") {
                 ytp.settings.slowerKeyCode = "186"; // ;
                 ytp.settings.fasterKeyCode = "222"; // '
-            } else if (items.hotkeysSetting == 's3') {
+            } else if (items.hotkeysSetting == "s3") {
                 ytp.settings.slowerKeyCode = "188"; // ,
                 ytp.settings.fasterKeyCode = "190"; // .
             }
 
-            ytp.settings.keepSpeed = items.keepSpeedSetting == 'yes';
+            ytp.settings.keepSpeed = items.keepSpeedSetting == "yes";
         });
     }
 
-    chrome.storage.onChanged.addListener(function (changes, namespace) {
+    chrome.storage.onChanged.addListener(() => {
         updateSettings();
     });
 
     updateSettings();
 
-    ytp.videoController = function (vid) {
-        this.video = vid;
-        this.initializeControls();
-        this.speedIndicator.textContent = "1x";
-        vid.addEventListener("ratechange", function () {
-            if (vid.readyState === 0) {
-                return;
-            }
-            this.speedIndicator.textContent = this.video.playbackRate + "x";
-        }.bind(this));
-    };
+    ytp.videoController = function (video) {
+        let elem = document.createDocumentFragment();
 
-    ytp.videoController.prototype.initializeControls = function () {
-        let R = document.createDocumentFragment();
-        let S = document.createElement("div");
-        S.setAttribute("id", "PlayBackRatePanel");
-        S.className = "PlayBackRatePanel";
-        let T = document.createElement("button");
-        T.setAttribute("id", "PlayBackRate");
-        T.className = "btn";
-        S.style.display = "none";
-        S.appendChild(T);
-        R.appendChild(S);
-        this.video.parentElement.parentElement.insertBefore(R, this.video.parentElement);
-        this.speedIndicator = T;
-    };
+        let div = document.createElement("div");
+        div.className = "PlayBackRatePanel";
+        div.style.display = "none";
 
-    let vids = document.getElementsByTagName("video");
-    for (let i = 0; i < vids.length; i++) {
-        new ytp.videoController(vids[i]);
+        let inner = document.createElement("button");
+        inner.className = "PlayBackRateTooltip";
+
+        div.appendChild(inner);
+        elem.appendChild(div);
+
+        video.parentElement.parentElement.insertBefore(elem, video.parentElement);
+        video.acceleratorEnabled = true;
     }
 
-    document.addEventListener("DOMNodeInserted", function (ev) {
-        let node = ev.target || null;
-        if (node && node.nodeName === "VIDEO") {
-            new ytp.videoController(node);
-        }
-    });
-
-    document.addEventListener("keydown", function (ev) {
+    document.addEventListener("keydown", (ev) => {
         if ((document.activeElement.nodeName === "INPUT" && document.activeElement.getAttribute("type") === "text")
             || (document.activeElement.parentElement.nodeName === "YT-FORMATTED-STRING"
-                && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")) {
-            return false;
+                && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")
+            || (ev.which != ytp.settings.slowerKeyCode && ev.which != ytp.settings.fasterKeyCode && ev.which != ytp.settings.resetKeyCode
+                && ev.which != "188" && ev.which != "190")) {
+            return;
         }
 
         let vids = document.getElementsByTagName("video");
+        let accelerationValue = Number(sessionStorage.getItem("ytAcceleratorValue"));
 
-        for (let i = 0; i < vids.length; i++) {
-            let vid = vids[i];
-
-            if (vid.playbackRate == null || vid.playbackRate == 0) {
-                return false;
-            }
-
-            if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
-                if (vid.playbackRate < ytp.settings.maxSpeed) {
-                    vid.playbackRate += 0.25;
-                } else {
-                    vid.playbackRate = ytp.settings.maxSpeed;
-                }
-            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
-                if (vid.playbackRate > 0.25) {
-                    vid.playbackRate -= 0.25;
-                }
-            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.resetKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
-                vid.playbackRate = 1;
+        if (accelerationValue == 0) {
+            if (vids.length > 0) {
+                accelerationValue = vids[0].playbackRate;
             } else {
-                if (ev.shiftKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
-                    sessionStorage.setItem("ytAcceleratorValue", Math.min(vid.playbackRate + 0.25, 2));
-                } else if (ev.shiftKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
-                    sessionStorage.setItem("ytAcceleratorValue", Math.max(vid.playbackRate - 0.25, 0.25));
-                }
-
-                return false;
+                return;
             }
-
-            let t = document.getElementById("PlayBackRate");
-            if (t != null) t.textContent = vid.playbackRate + "x";
-
-            sessionStorage.setItem("ytAcceleratorValue", vid.playbackRate);
-            showTooltip(vid.playbackRate);
         }
 
-        return false;
+        if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.fasterKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+            accelerationValue = Math.min(accelerationValue + 0.25, ytp.settings.maxSpeed);
+        } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.slowerKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+            accelerationValue = Math.max(accelerationValue - 0.25, 0.25);
+        } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.resetKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+            accelerationValue = 1;
+        } else {
+            if (ev.shiftKey && "190".match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+                if (vids.length > 0) {
+                    sessionStorage.setItem("ytAcceleratorValue", Math.min(vids[0].playbackRate + 0.25, 2));
+                }
+            } else if (ev.shiftKey && "188".match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+                if (vids.length > 0) {
+                    sessionStorage.setItem("ytAcceleratorValue", Math.max(vids[0].playbackRate - 0.25, 0.25));
+                }
+            }
+
+            return;
+        }
+
+        for (let i = 0; i < vids.length; i++) {
+            if (!vids[i].acceleratorEnabled) {
+                new ytp.videoController(vids[i]);
+            }
+
+            vids[i].playbackRate = accelerationValue;
+        }
+
+        sessionStorage.setItem("ytAcceleratorValue", accelerationValue);
+        applyPlaybackRate(accelerationValue);
     }, true);
 
-    let updateTooltips = function () {
+    const updateTooltips = function () {
         let tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
         for (let i = 0; i < tooltips.length; i++) {
             if (document.webkitIsFullScreen == true) {
@@ -150,18 +132,22 @@ let ytPluginStart = function () {
     document.addEventListener("mozfullscreenchange", updateTooltips, false);
     document.addEventListener("webkitfullscreenchange", updateTooltips, false);
 
-    let showTooltip = function (playbackRate) {
+    const applyPlaybackRate = function (playbackRate) {
         let tooltips = document.querySelectorAll(".PlayBackRatePanel,.PlayBackRatePanelFullScreen");
         for (let i = 0; i < tooltips.length; i++) {
-            let tstyle = tooltips[i].style;
+            let tooltip = tooltips[i];
 
-            if (tstyle.display === "none") {
-                tstyle.display = "inline";
+            if (tooltip.childNodes != null && tooltip.childNodes.length > 0) {
+                tooltip.childNodes[0].textContent = playbackRate + "x";
             }
 
-            setTimeout(function () {
-                if (sessionStorage.getItem("ytAcceleratorValue") == playbackRate) {
-                    tstyle.display = "none";
+            if (tooltip.style.display === "none") {
+                tooltip.style.display = "inline";
+            }
+
+            setTimeout(() => {
+                if (Number(sessionStorage.getItem("ytAcceleratorValue")) == playbackRate) {
+                    tooltip.style.display = "none";
                 }
             }, ytp.settings.tooltipFade);
         }
@@ -169,32 +155,31 @@ let ytPluginStart = function () {
 
     window.addEventListener("yt-navigate-finish", () => {
         if (!ytp.settings.keepSpeed) {
+            sessionStorage.setItem("ytAcceleratorValue", 1);
             return;
         }
 
-        let ytAcceleration = sessionStorage.getItem("ytAcceleratorValue");
-
-        if (ytAcceleration == null) {
+        let accelerationValue = Number(sessionStorage.getItem("ytAcceleratorValue"));
+        if (accelerationValue == 0) {
             return;
         }
 
         let vids = document.getElementsByTagName("video");
         for (let i = 0; i < vids.length; i++) {
-            vids[i].playbackRate = ytAcceleration;
+            if (!vids[i].acceleratorEnabled) {
+                new ytp.videoController(vids[i]);
+            }
+
+            vids[i].playbackRate = accelerationValue;
         }
 
-        var pbrate = document.getElementById("PlayBackRate");
-        if (pbrate != null) {
-            pbrate.textContent = ytAcceleration + "x";
-
-            if (ytAcceleration != 1) {
-                showTooltip(ytAcceleration);
-            }
+        if (accelerationValue != 1) {
+            applyPlaybackRate(accelerationValue);
         }
     }, true);
 }
 
-let waitForYtPageComplete = function () {
+const waitForYtPageComplete = function () {
     if (document.readyState === "interactive" || document.readyState === "complete") {
         ytPluginStart();
     } else {
