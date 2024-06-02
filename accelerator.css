@@ -33,4 +33,9 @@
 /* Fix to hide scrollbars in fullscreen mode */
 body > ytd-app::-webkit-scrollbar {
     display: none;
+    scrollbar-color: auto;
+}
+
+body > ytd-app {
+    scrollbar-color: auto;
 }
