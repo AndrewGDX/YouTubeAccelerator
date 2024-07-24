@@ -5,9 +5,11 @@ const ytPluginStart = function () {
         settings: {
             maxSpeed: 8,
             tooltipFade: 300,
-            slowerKeyCode: "188", // ,
-            fasterKeyCode: "190", // .
-            resetKeyCode: "82", // R
+            slowerKeyCode:   "188", // ,
+            fasterKeyCode:   "190", // .
+            resetKeyCode:     "82", // R
+            subtitlesKeyCode:  "83", // S
+            qualityKeyCode:   "81", // Q
             keepSpeed: true
         }
     }
@@ -69,6 +71,7 @@ const ytPluginStart = function () {
             || (document.activeElement.parentElement.nodeName === "YT-FORMATTED-STRING"
                 && document.activeElement.parentElement.getAttribute("id") === "contenteditable-textarea")
             || (ev.which != ytp.settings.slowerKeyCode && ev.which != ytp.settings.fasterKeyCode && ev.which != ytp.settings.resetKeyCode
+                && ev.which != ytp.settings.qualityKeyCode && ev.which != ytp.settings.subtitlesKeyCode
                 && ev.which != "188" && ev.which != "190")) {
             return;
         }
@@ -98,6 +101,30 @@ const ytPluginStart = function () {
             } else if (ev.shiftKey && "188".match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
                 if (vids.length > 0) {
                     sessionStorage.setItem("ytAcceleratorValue", Math.max(vids[0].playbackRate - 0.25, 0.25));
+                }
+            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.qualityKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+                const settingsButton = document.getElementsByClassName('ytp-settings-button');
+                if (settingsButton != null && settingsButton.length > 0) {
+                    settingsButton[0].click();
+                    const items = document.getElementsByClassName('ytp-menuitem');
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].innerText.includes("Quality")) {
+                            items[i].click();
+                            break;
+                        }
+                    }
+                }
+            } else if (!ev.shiftKey && !ev.metaKey && !ev.ctrlKey && ytp.settings.subtitlesKeyCode.match(new RegExp("(?:^|,)" + ev.which + "(?:,|$)"))) {
+                const settingsButton = document.getElementsByClassName('ytp-settings-button');
+                if (settingsButton != null && settingsButton.length > 0) {
+                    settingsButton[0].click();
+                    const items = document.getElementsByClassName('ytp-menuitem');
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].innerText.includes("Subtitles")) {
+                            items[i].click();
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -154,6 +181,28 @@ const ytPluginStart = function () {
     }
 
     window.addEventListener("yt-navigate-finish", () => {
+        if (window.location.pathname === "/watch") {
+            const settingsButton = document.getElementsByClassName('ytp-settings-button');
+            if (settingsButton != null && settingsButton.length > 0) {
+                settingsButton[0].click();
+                settingsButton[0].click();
+
+                const ambientModeOff = () => {
+                    const items = document.getElementsByClassName('ytp-menuitem');
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].innerText.includes("Ambient")) {
+                            if (items[i].getAttribute('aria-checked') === "true") {
+                                items[i].click();
+                                setTimeout(ambientModeOff, 100);
+                            }
+                            break;
+                        }
+                    }
+                }
+                setTimeout(ambientModeOff, 100);
+            }
+        }
+
         if (!ytp.settings.keepSpeed) {
             sessionStorage.setItem("ytAcceleratorValue", 1);
             return;
