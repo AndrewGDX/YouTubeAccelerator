@@ -201,6 +201,22 @@ const ytPluginStart = function () {
                 }
                 setTimeout(ambientModeOff, 100);
             }
+
+            const clearAnnoyingListeners = () => {
+                const scrollForDetailsButton = document.getElementsByClassName('ytp-fullerscreen-edu-button');
+                const chapterContainerButton = document.getElementsByClassName('ytp-chapter-container');
+
+                if (scrollForDetailsButton != null && scrollForDetailsButton.length > 0
+                    && chapterContainerButton != null && chapterContainerButton.length > 0) {
+                    scrollForDetailsButton[0].remove();
+
+                    var clearElement = chapterContainerButton[0].cloneNode(true);
+                    chapterContainerButton[0].parentNode.replaceChild(clearElement, chapterContainerButton[0]);
+                } else {
+                    setTimeout(clearAnnoyingListeners, 200);
+                }
+            }
+            setTimeout(clearAnnoyingListeners, 200);
         }
 
         if (!ytp.settings.keepSpeed) {
