@@ -180,7 +180,7 @@ const ytPluginStart = function () {
         }
     }
 
-    window.addEventListener("yt-navigate-finish", () => {
+    const reapply = function () {
         if (window.location.pathname === "/watch") {
             const settingsButton = document.getElementsByClassName('ytp-settings-button');
             if (settingsButton != null && settingsButton.length > 0) {
@@ -204,19 +204,13 @@ const ytPluginStart = function () {
 
             const clearAnnoyingListeners = () => {
                 const scrollForDetailsButton = document.getElementsByClassName('ytp-fullerscreen-edu-button');
-                const chapterContainerButton = document.getElementsByClassName('ytp-chapter-container');
-
-                if (scrollForDetailsButton != null && scrollForDetailsButton.length > 0
-                    && chapterContainerButton != null && chapterContainerButton.length > 0) {
+                if (scrollForDetailsButton != null && scrollForDetailsButton.length > 0) {
                     scrollForDetailsButton[0].remove();
-
-                    var clearElement = chapterContainerButton[0].cloneNode(true);
-                    chapterContainerButton[0].parentNode.replaceChild(clearElement, chapterContainerButton[0]);
                 } else {
-                    setTimeout(clearAnnoyingListeners, 200);
+                    setTimeout(clearAnnoyingListeners, 300);
                 }
             }
-            setTimeout(clearAnnoyingListeners, 200);
+            setTimeout(clearAnnoyingListeners, 300);
         }
 
         if (!ytp.settings.keepSpeed) {
@@ -241,7 +235,10 @@ const ytPluginStart = function () {
         if (accelerationValue != 1) {
             applyPlaybackRate(accelerationValue);
         }
-    }, true);
+    }
+
+    window.addEventListener("yt-navigate-finish", reapply, true);
+    reapply();
 }
 
 const waitForYtPageComplete = function () {

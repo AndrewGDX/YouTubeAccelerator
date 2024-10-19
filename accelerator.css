@@ -30,6 +30,16 @@
     padding: 0px;
 }
 
+/* Return old masthead color */
+#background.ytd-masthead {
+    background: #0f0f0f !important;
+}
+
+/* Fix annoying click listener */
+.ytp-chapter-container {
+    flex: none !important;
+}
+
 /* Fix to hide scrollbars in fullscreen mode */
 body > ytd-app::-webkit-scrollbar {
     display: none;
